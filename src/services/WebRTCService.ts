@@ -7,7 +7,7 @@ import {
 } from "./SignalingMessage";
 import { EventDispatcher } from "./EventDispatcher";
 
-const SIGNALING_SERVER = "ws://localhost:9090";
+const SIGNALING_SERVER = process.env.VUE_APP_SERVER_URL || "ws://localhost:9090";
 const RTC_CONNECTION_CONFIG = {
   iceServers: [
     {
