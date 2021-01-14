@@ -49,7 +49,7 @@
               <template #header>
                 <i class="pi pi-camera"></i>
               </template>
-              <qr-scanner @scan="onQrScan"></qr-scanner>
+              <qr-scanner @scan="onQrScan" @error="onQrScanError"></qr-scanner>
               <div style="height: 1rem;"></div>
               <div class="p-inputgroup text-input">
                 <InputText
@@ -98,7 +98,14 @@
       </div>
     </div>
 
-    <Toast></Toast>
+    <!-- Error Dialog -->
+    <Dialog header="Error" closable modal v-model:visible="showErrorDialog">
+      {{ errorMessage }}
+
+      <template #footer>
+        <Button label="Close" @click="showErrorDialog = false" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -108,9 +115,9 @@ import { defineComponent } from "vue";
 // Compoenents
 import Card from "primevue/card";
 import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import TabView from "primevue/tabview";
-import Toast from "primevue/toast";
 import TabPanel from "primevue/tabpanel";
 import QrCode from "./components/QrCode.vue";
 import QrScanner from "./components/QrScanner.vue";
@@ -124,10 +131,10 @@ export default defineComponent({
   components: {
     Card,
     Button,
+    Dialog,
     InputText,
     TabView,
     TabPanel,
-    Toast,
     QrCode,
     QrScanner
   },
@@ -138,7 +145,10 @@ export default defineComponent({
       connectionEstablished: false,
 
       currentMessage: "",
-      messages: [] as string[]
+      messages: [] as string[],
+
+      showErrorDialog: false,
+      errorMessage: ""
     };
   },
   mounted() {
@@ -162,6 +172,11 @@ export default defineComponent({
     onQrScan(uuid: string) {
       this.peerUuid = uuid;
       this.connectToDevice();
+    },
+
+    onQrScanError(error: string) {
+      this.errorMessage = error;
+      this.showErrorDialog = true;
     },
 
     connectToDevice() {

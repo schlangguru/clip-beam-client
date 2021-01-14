@@ -1,9 +1,5 @@
 <template>
   <div class="container">
-    <Message v-if="error" severity="error" :closable="false">{{
-      error
-    }}</Message>
-
     <Dropdown
       v-model="selectedCamera"
       :options="cameras"
@@ -24,7 +20,6 @@ import { defineComponent } from "vue";
 // Components
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
-import Message from "primevue/message";
 
 // Services
 import { BrowserQRCodeReader, VideoInputDevice } from "@zxing/library";
@@ -35,21 +30,14 @@ export default defineComponent({
   name: "QrScanner",
   components: {
     Button,
-    Dropdown,
-    Message
+    Dropdown
   },
-  emits: ["scan"],
+  emits: ["scan", "error"],
   data() {
     return {
       cameras: [] as VideoInputDevice[],
-      selectedCamera: null as VideoInputDevice | null,
-      error: ""
+      selectedCamera: null as VideoInputDevice | null
     };
-  },
-  computed: {
-    cameraSelection() {
-      return "";
-    }
   },
   mounted() {
     this.initCameras();
@@ -58,7 +46,7 @@ export default defineComponent({
     async initCameras() {
       const videoInputDevices = await codeReader.getVideoInputDevices();
       if (videoInputDevices.length == 0) {
-        this.error = "No camera found.";
+        this.$emit("error", "No camera found.");
       } else {
         this.cameras = videoInputDevices;
         this.selectedCamera = this.cameras[0];
@@ -67,7 +55,7 @@ export default defineComponent({
 
     async scan() {
       if (!this.selectedCamera) {
-        this.error = "No camera selected.";
+        this.$emit("error", "No camera selected.");
         return;
       }
 
@@ -79,7 +67,7 @@ export default defineComponent({
         );
         this.$emit("scan", result.getText());
       } catch (err) {
-        // ignore
+        this.$emit("error", err);
       }
     },
 
