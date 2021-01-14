@@ -10,7 +10,7 @@
 
     <video ref="video"></video>
 
-    <Button @click="scan" label="Scan"></Button>
+    <Button @click="initCameras" label="Scan"></Button>
   </div>
 </template>
 
@@ -39,9 +39,6 @@ export default defineComponent({
       selectedCamera: null as VideoInputDevice | null
     };
   },
-  mounted() {
-    this.initCameras();
-  },
   methods: {
     async initCameras() {
       const videoInputDevices = await codeReader.getVideoInputDevices();
@@ -51,6 +48,7 @@ export default defineComponent({
         this.cameras = videoInputDevices;
         this.selectedCamera = this.cameras[0];
       }
+      this.scan();
     },
 
     async scan() {
@@ -67,7 +65,7 @@ export default defineComponent({
         );
         this.$emit("scan", result.getText());
       } catch (err) {
-        this.$emit("error", err);
+        // ignore
       }
     },
 

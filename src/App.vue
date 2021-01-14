@@ -156,6 +156,11 @@ export default defineComponent({
     webRTCService.onConnected.addListener(() => {
       this.connectionEstablished = true;
     });
+    webRTCService.onConnectionClosed.addListener(() => {
+      this.errorMessage = "The connection was closed";
+      this.showErrorDialog = true;
+      this.connectionEstablished = false;
+    });
     webRTCService.onData.addListener(msg => {
       this.addMessage(msg);
     });

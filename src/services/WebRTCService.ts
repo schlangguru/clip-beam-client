@@ -7,7 +7,8 @@ import {
 } from "./SignalingMessage";
 import { EventDispatcher } from "./EventDispatcher";
 
-const SIGNALING_SERVER = process.env.VUE_APP_SERVER_URL || "ws://localhost:9090";
+const SIGNALING_SERVER =
+  process.env.VUE_APP_SERVER_URL || "ws://localhost:9090";
 const RTC_CONNECTION_CONFIG = {
   iceServers: [
     {
@@ -23,6 +24,7 @@ class WebRTCService {
   private dataChannel?: RTCDataChannel;
 
   public readonly onConnected = new EventDispatcher<void>();
+  public readonly onConnectionClosed = new EventDispatcher<void>();
   public readonly onData = new EventDispatcher<string>();
 
   constructor() {
@@ -135,6 +137,12 @@ class WebRTCService {
     this.dataChannel = event.channel || event.target;
     this.dataChannel.onmessage = event => {
       this.onData.dispatch(event.data);
+    };
+    this.dataChannel.onclose = () => {
+      this.onConnectionClosed.dispatch();
+    };
+    this.dataChannel.onerror = event => {
+      console.error(event);
     };
 
     this.onConnected.dispatch();
