@@ -13,6 +13,8 @@
     />
 
     <video ref="video"></video>
+
+    <Button @click="scan" label="Scan"></Button>
   </div>
 </template>
 
@@ -20,6 +22,7 @@
 import { defineComponent } from "vue";
 
 // Components
+import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Message from "primevue/message";
 
@@ -31,6 +34,7 @@ const codeReader = new BrowserQRCodeReader();
 export default defineComponent({
   name: "QrScanner",
   components: {
+    Button,
     Dropdown,
     Message
   },
@@ -58,7 +62,6 @@ export default defineComponent({
       } else {
         this.cameras = videoInputDevices;
         this.selectedCamera = this.cameras[0];
-        this.scan();
       }
     },
 
