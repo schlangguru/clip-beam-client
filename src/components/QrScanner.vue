@@ -64,6 +64,7 @@ export default defineComponent({
           videoElement
         );
         this.$emit("scan", result.getText());
+        this.stopScan();
       } catch (err) {
         // ignore
       }
@@ -72,6 +73,10 @@ export default defineComponent({
     cameraChanged() {
       codeReader.reset();
       this.scan();
+    },
+
+    stopScan() {
+      codeReader.reset();
     }
   }
 });
