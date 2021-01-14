@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="panel">
       <div class="panel-header">
-        Clip Beam
+        <img src="/img/logo-inversed.svg" />
       </div>
       <!-- Establish connection view -->
       <div v-if="!connectionEstablished" class="panel-content">
@@ -211,6 +211,10 @@ export default defineComponent({
 @import url("../node_modules/primevue/resources/themes/saga-blue/theme.css");
 @import url("../node_modules/primevue/resources/primevue.min.css");
 @import url("../node_modules/primeicons/primeicons.css");
+@font-face {
+  font-family: "Fredoka One";
+  src: url("/fonts/Fredoka_One/FredokaOne-Regular.ttf") format("truetype");
+}
 
 html,
 body {
@@ -218,6 +222,24 @@ body {
   margin: 0;
 }
 
+/** Override some styles from prime. */
+.p-button,
+.p-button-primary {
+  border-color: #3d5a6c !important;
+  background-color: #3d5a6c !important;
+}
+
+.p-button-secondary {
+  border-color: #72a98f !important;
+  background-color: #72a98f !important;
+}
+
+.p-highlight .p-tabview-nav-link {
+  color: #72a98f !important;
+  border-color: #72a98f !important;
+}
+
+/** App Style. */
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -228,7 +250,7 @@ body {
 .app-container {
   width: 100vw;
   height: 100vh;
-  background-image: url("https://cdn.pixabay.com/photo/2015/03/03/21/10/forest-657903_960_720.jpg");
+  background-image: url("/img/background.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -247,7 +269,7 @@ body {
 }
 
 .panel-header {
-  background: #607d8b;
+  background: #3d5a6c;
   padding: 10px 15px;
   text-align: center;
   font-size: 2rem;
@@ -260,7 +282,7 @@ body {
   justify-content: center;
 
   width: 90vw;
-  height: 80vh;
+  height: 75vh;
   max-width: 1000px;
   max-height: 600px;
   padding: 10px;
