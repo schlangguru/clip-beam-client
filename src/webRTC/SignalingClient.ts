@@ -5,8 +5,8 @@ import {
   AnswerPayload,
   ICECandidatePayload
 } from "./SignalingMessage";
+import { PeerConnection } from "./PeerConnection";
 import { EventDispatcher } from "./EventDispatcher";
-import { MessageChannel } from "./MessageChannel";
 
 const SIGNALING_SERVER =
   process.env.VUE_APP_SERVER_URL || "ws://localhost:9090";
@@ -17,14 +17,15 @@ const RTC_CONNECTION_CONFIG = {
     }
   ]
 };
-const DATA_CHANNEL_NAME = "data-channel";
+const DATA_CHANNEL_NAME = "heartbeat";
 
-class WebRTCService {
+export class SignalingClient {
   private readonly signalingSocket: WebSocket;
   private readonly rtcPeerConnection: RTCPeerConnection;
 
-  public channel?: MessageChannel;
-  public readonly onChannelOpened = new EventDispatcher<MessageChannel>();
+  public readonly onConnectionEstablished = new EventDispatcher<
+    PeerConnection
+  >();
 
   constructor() {
     this.signalingSocket = new WebSocket(SIGNALING_SERVER);
@@ -125,11 +126,9 @@ class WebRTCService {
   }
 
   private onDataChannelOpened(event: RTCDataChannelEvent) {
-    this.channel = new MessageChannel(event.channel || event.target);
-    this.onChannelOpened.dispatch(this.channel);
+    const dataChannel = event.channel || event.target;
+    this.onConnectionEstablished.dispatch(
+      new PeerConnection(this.rtcPeerConnection, dataChannel)
+    );
   }
 }
-
-// Export Singleton
-const service = new WebRTCService();
-export default service;

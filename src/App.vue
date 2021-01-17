@@ -134,7 +134,11 @@ import QrScanner from "./components/QrScanner.vue";
 
 // Services
 import { v4 as uuidv4 } from "uuid";
-import webRTCService from "./services/WebRTCService";
+import { SignalingClient } from "./webRTC/SignalingClient";
+import { PeerConnection } from "./webRTC/PeerConnection";
+
+const signalingClient = new SignalingClient();
+let connection: PeerConnection;
 
 export default defineComponent({
   name: "App",
@@ -162,16 +166,11 @@ export default defineComponent({
     };
   },
   mounted() {
-    webRTCService.registerClient(this.myUuid);
-    webRTCService.onChannelOpened.addListener(channel => {
+    signalingClient.registerClient(this.myUuid);
+    signalingClient.onConnectionEstablished.addListener(con => {
+      connection = con;
       this.connectionEstablished = true;
-      channel.onFileRecieved.addListener(file => {
-        this.addMessage(file);
-      });
-      channel.onTextRecieved.addListener(text => {
-        this.addMessage(text);
-      });
-      channel.onClose.addListener(() => {
+      connection.onClose.addListener(() => {
         this.errorMessage = "The connection was closed";
         this.showErrorDialog = true;
         this.connectionEstablished = false;
@@ -199,13 +198,13 @@ export default defineComponent({
 
     connectToDevice() {
       if (this.peerUuid) {
-        webRTCService.connectToDevice(this.peerUuid);
+        signalingClient.connectToDevice(this.peerUuid);
       }
     },
 
     sendText() {
-      if (webRTCService.channel) {
-        webRTCService.channel.sendText(this.currentMessage);
+      if (connection) {
+        connection.sendText(this.currentMessage);
         this.addMessage(this.currentMessage);
         this.currentMessage = "";
       } else {
@@ -235,9 +234,8 @@ export default defineComponent({
     },
 
     sendFile(file: File) {
-      const onProgress = progress => console.log("Send File: ", progress);
-      if (webRTCService.channel) {
-        webRTCService.channel.sendFile(file, onProgress);
+      if (connection) {
+        connection.sendFile(file);
         this.addMessage(file);
       } else {
         this.connectionEstablished = false;

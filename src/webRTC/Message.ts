@@ -13,3 +13,7 @@ export interface FileMessageHeader extends MessageHeader {
   fileName: string;
   mimeType: string;
 }
+
+export interface Message extends MessageHeader {
+  payload: string | File;
+}
