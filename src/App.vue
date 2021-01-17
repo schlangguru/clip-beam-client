@@ -75,7 +75,7 @@
             <div class="messages">
               <Card v-for="msg in messages" v-bind:key="msg" class="message">
                 <template #content>
-                  {{ msg }}
+                  <a :href="fileUrl(msg)" :download="msg.name">Download</a>
                 </template>
               </Card>
             </div>
@@ -83,15 +83,25 @@
 
           <div class="p-inputgroup text-input">
             <InputText
-              @keyup.enter="sendMessage"
+              @keyup.enter="sendText"
               placeholder="send text"
               v-model="currentMessage"
             />
-            <Button icon="pi pi-paperclip" class="p-button-secondary" />
             <Button
-              @click="sendMessage"
+              @click="selectFile"
+              icon="pi pi-paperclip"
+              class="p-button-secondary"
+            />
+            <Button
+              @click="sendText"
               icon="pi pi-caret-right"
               class="p-button-primary"
+            />
+            <input
+              @change="onFileSelected"
+              type="file"
+              id="file-input"
+              style="display: none"
             />
           </div>
         </div>
@@ -145,7 +155,7 @@ export default defineComponent({
       connectionEstablished: false,
 
       currentMessage: "",
-      messages: [] as string[],
+      messages: [] as (string | File)[],
 
       showErrorDialog: false,
       errorMessage: ""
@@ -153,16 +163,19 @@ export default defineComponent({
   },
   mounted() {
     webRTCService.registerClient(this.myUuid);
-    webRTCService.onConnected.addListener(() => {
+    webRTCService.onChannelOpened.addListener(channel => {
       this.connectionEstablished = true;
-    });
-    webRTCService.onConnectionClosed.addListener(() => {
-      this.errorMessage = "The connection was closed";
-      this.showErrorDialog = true;
-      this.connectionEstablished = false;
-    });
-    webRTCService.onData.addListener(msg => {
-      this.addMessage(msg);
+      channel.onFileRecieved.addListener(file => {
+        this.addMessage(file);
+      });
+      channel.onTextRecieved.addListener(text => {
+        this.addMessage(text);
+      });
+      channel.onClose.addListener(() => {
+        this.errorMessage = "The connection was closed";
+        this.showErrorDialog = true;
+        this.connectionEstablished = false;
+      });
     });
   },
   methods: {
@@ -190,18 +203,49 @@ export default defineComponent({
       }
     },
 
-    sendMessage() {
-      webRTCService.sendMessage(this.currentMessage);
-      this.addMessage(this.currentMessage);
-      this.currentMessage = "";
+    sendText() {
+      if (webRTCService.channel) {
+        webRTCService.channel.sendText(this.currentMessage);
+        this.addMessage(this.currentMessage);
+        this.currentMessage = "";
+      } else {
+        this.connectionEstablished = false;
+      }
     },
 
-    addMessage(msg: string) {
+    addMessage(msg: string | File) {
       this.messages.push(msg);
       this.$nextTick(() => {
         const bottomMsg = this.$el.querySelector(".message:last-child");
         bottomMsg.scrollIntoView();
       });
+    },
+
+    selectFile() {
+      this.$el.querySelector("#file-input").click();
+    },
+
+    onFileSelected(event: InputEvent) {
+      const el = event.target as HTMLInputElement;
+      const files = el.files;
+      if (files && files.length >= 1) {
+        const file = files[0];
+        this.sendFile(file);
+      }
+    },
+
+    sendFile(file: File) {
+      const onProgress = progress => console.log("Send File: ", progress);
+      if (webRTCService.channel) {
+        webRTCService.channel.sendFile(file, onProgress);
+        this.addMessage(file);
+      } else {
+        this.connectionEstablished = false;
+      }
+    },
+
+    fileUrl(file: File) {
+      return URL.createObjectURL(file);
     }
   }
 });

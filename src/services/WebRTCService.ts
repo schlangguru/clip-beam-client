@@ -6,6 +6,7 @@ import {
   ICECandidatePayload
 } from "./SignalingMessage";
 import { EventDispatcher } from "./EventDispatcher";
+import { MessageChannel } from "./MessageChannel";
 
 const SIGNALING_SERVER =
   process.env.VUE_APP_SERVER_URL || "ws://localhost:9090";
@@ -21,11 +22,9 @@ const DATA_CHANNEL_NAME = "data-channel";
 class WebRTCService {
   private readonly signalingSocket: WebSocket;
   private readonly rtcPeerConnection: RTCPeerConnection;
-  private dataChannel?: RTCDataChannel;
 
-  public readonly onConnected = new EventDispatcher<void>();
-  public readonly onConnectionClosed = new EventDispatcher<void>();
-  public readonly onData = new EventDispatcher<string>();
+  public channel?: MessageChannel;
+  public readonly onChannelOpened = new EventDispatcher<MessageChannel>();
 
   constructor() {
     this.signalingSocket = new WebSocket(SIGNALING_SERVER);
@@ -69,14 +68,6 @@ class WebRTCService {
         peerUuid: peerUuid
       }
     });
-  }
-
-  public sendMessage(msg: string) {
-    if (this.dataChannel) {
-      this.dataChannel.send(msg);
-    } else {
-      throw "No data channel established.";
-    }
   }
 
   private onSignalingMessage(message: SignalingMsg) {
@@ -134,18 +125,8 @@ class WebRTCService {
   }
 
   private onDataChannelOpened(event: RTCDataChannelEvent) {
-    this.dataChannel = event.channel || event.target;
-    this.dataChannel.onmessage = event => {
-      this.onData.dispatch(event.data);
-    };
-    this.dataChannel.onclose = () => {
-      this.onConnectionClosed.dispatch();
-    };
-    this.dataChannel.onerror = event => {
-      console.error(event);
-    };
-
-    this.onConnected.dispatch();
+    this.channel = new MessageChannel(event.channel || event.target);
+    this.onChannelOpened.dispatch(this.channel);
   }
 }
 
