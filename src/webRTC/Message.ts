@@ -5,15 +5,12 @@ export enum MessageType {
 
 export interface MessageHeader {
   type: MessageType;
+  name?: string;
   size: number;
-  timeSent: Date;
 }
 
-export interface FileMessageHeader extends MessageHeader {
-  fileName: string;
-  mimeType: string;
-}
-
-export interface Message extends MessageHeader {
+export interface Message {
+  type: MessageType;
+  timestamp: Date;
   payload: string | File;
 }

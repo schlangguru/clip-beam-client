@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { MessageType, MessageHeader, FileMessageHeader } from "./Message";
+import { MessageType, MessageHeader } from "./Message";
 
 abstract class Sender {
   protected readonly dataChannel: RTCDataChannel;
@@ -44,7 +44,7 @@ export class FileSender extends Sender {
       timeSent: new Date(),
       fileName: this.file.name,
       mimeType: this.file.type
-    } as FileMessageHeader;
+    } as MessageHeader;
 
     this.dataChannel.send(JSON.stringify(header));
     this.sendFileChunks();
