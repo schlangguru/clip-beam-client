@@ -3,7 +3,7 @@
     <!-- Message Content -->
     <div v-if="msg.transferCompleted">
       <!-- FILE -->
-      <div v-if="isFile" class="content">
+      <div v-if="isFile" class="content-file">
         <div class="content-left">
           <a :href="fileUrl" :download="msg.header.name">
             <i class="pi pi-file" style="fontSize: 5rem"></i>
@@ -15,14 +15,21 @@
           </a>
         </div>
       </div>
+
       <!-- TEXT -->
-      <div v-else class="content">
-        {{ msg.payload }}
+      <div v-else class="content-text">
+        <span>{{ msg.payload }}</span>
+        <Button
+          @click="copyToClipboard"
+          icon="pi pi-copy"
+          class="p-button-primary"
+          v-tooltip.bottom="'copy into clipboard'"
+        />
       </div>
     </div>
 
     <!-- Loader Skeleton -->
-    <div v-else class="content">
+    <div v-else class="content-file">
       <div class="content-left">
         <Skeleton shape="circle" size="5rem"></Skeleton>
       </div>
@@ -41,16 +48,22 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import Button from "primevue/button";
 import Skeleton from "primevue/skeleton";
+import Tooltip from "primevue/tooltip";
 import { MessageType, Message } from "../webRTC/Message";
 
 export default defineComponent({
   name: "MessageCard",
   components: {
+    Button,
     Skeleton
   },
   props: {
     msg: Object as () => Message
+  },
+  directives: {
+    tooltip: Tooltip
   },
   data() {
     return {};
@@ -66,6 +79,23 @@ export default defineComponent({
       }
 
       return "";
+    }
+  },
+  methods: {
+    copyToClipboard() {
+      if (typeof this.msg?.payload === "string") {
+        const textArea = document.createElement("textarea");
+        textArea.value = this.msg.payload;
+        // Avoid scrolling to bottom
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
     }
   }
 });
@@ -89,7 +119,15 @@ a:active {
     0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
-.card .content {
+.card .content-text {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.card .content-file {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -97,11 +135,11 @@ a:active {
   padding: 15px;
 }
 
-.card .content .content-left {
+.card .content-file .content-left {
   width: 20%;
 }
 
-.card .content .content-right {
+.card .content-file .content-right {
   width: 80%;
   display: flex;
   flex-direction: column;
