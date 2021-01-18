@@ -62,16 +62,23 @@ export class TextReciever extends Reciever {
 export class FileReciever extends Reciever {
   private receivedChunks: ArrayBuffer[] = [];
   private bytesRecieved = 0;
+  private lastProgress = 0;
 
   protected onData(event: MessageEvent) {
     const buffer = event.data as ArrayBuffer;
     this.receivedChunks.push(buffer);
     this.bytesRecieved += buffer.byteLength;
-    this.onRecieveMessage.dispatch({
-      header: this.header(),
-      transferCompleted: false,
-      transferProgress: 100 * (this.bytesRecieved / this.header().size)
-    });
+
+    const progress = 100 * (this.bytesRecieved / this.header().size);
+    if (progress - this.lastProgress >= 1) {
+      this.lastProgress = progress;
+      this.onRecieveMessage.dispatch({
+        header: this.header(),
+        transferCompleted: false,
+        transferProgress: progress
+      });
+    }
+
     if (this.header().size === this.recievedByteLength()) {
       const fileName = this.header().name || "Unknown File";
       const file = new File(this.receivedChunks, fileName);
