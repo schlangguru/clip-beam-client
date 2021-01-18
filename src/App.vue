@@ -183,6 +183,10 @@ export default defineComponent({
         const id = event.id;
         const msg = event.msg;
         this.messages[id] = msg;
+        this.$nextTick(() => {
+          const bottomMsg = this.$el.querySelector(".message:last-child");
+          bottomMsg.scrollIntoView();
+        });
       });
     });
   },
