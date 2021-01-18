@@ -6,14 +6,20 @@
       <div v-if="isFile" class="content-file">
         <div class="content-left">
           <a :href="fileUrl" :download="msg.header.name">
-            <i class="pi pi-file" style="fontSize: 5rem"></i>
+            <i class="pi pi-file" style="fontSize: 2rem"></i>
           </a>
         </div>
         <div class="content-right">
-          <a :href="fileUrl" :download="msg.header.name">
+          <a :href="fileUrl" :download="msg.header.name" class="download-link">
             {{ msg.header.name }}
           </a>
         </div>
+        <Button
+          @click="downloadFile"
+          icon="pi pi-download"
+          class="p-button-primary"
+          v-tooltip.bottom="'Download'"
+        />
       </div>
 
       <!-- TEXT -->
@@ -23,7 +29,7 @@
           @click="copyToClipboard"
           icon="pi pi-copy"
           class="p-button-primary"
-          v-tooltip.bottom="'copy into clipboard'"
+          v-tooltip.bottom="'Copy into clipboard'"
         />
       </div>
     </div>
@@ -83,9 +89,9 @@ export default defineComponent({
   },
   methods: {
     copyToClipboard() {
-      if (typeof this.msg?.payload === "string") {
+      if (this.msg?.header.type === MessageType.TEXT) {
         const textArea = document.createElement("textarea");
-        textArea.value = this.msg.payload;
+        textArea.value = this.msg.payload as string;
         // Avoid scrolling to bottom
         textArea.style.top = "0";
         textArea.style.left = "0";
@@ -95,6 +101,12 @@ export default defineComponent({
         textArea.select();
         document.execCommand("copy");
         document.body.removeChild(textArea);
+      }
+    },
+
+    downloadFile() {
+      if (this.msg?.header.type === MessageType.FILE) {
+        this.$el.querySelector(".download-link").click();
       }
     }
   }
