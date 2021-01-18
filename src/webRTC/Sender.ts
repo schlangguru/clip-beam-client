@@ -1,8 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
+import { EventDispatcher } from "./EventDispatcher";
 import { MessageType, MessageHeader } from "./Message";
 
 abstract class Sender {
   protected readonly dataChannel: RTCDataChannel;
+  public readonly onProgress = new EventDispatcher<number>();
 
   constructor(rtcConnection: RTCPeerConnection) {
     const label = `${this.type()}:${uuidv4()}`;
@@ -51,7 +53,7 @@ export class FileSender extends Sender {
   }
 
   private async sendFileChunks() {
-    // let bytesSent = 0;
+    let bytesSent = 0;
     const fileReader = new FileReader();
     let offset = 0;
     const readSlice = o => {
@@ -61,9 +63,9 @@ export class FileSender extends Sender {
     fileReader.onload = e => {
       const buffer = e.target?.result as ArrayBuffer;
       this.dataChannel.send(buffer);
-      // bytesSent += buffer.byteLength;
+      bytesSent += buffer.byteLength;
       offset += buffer.byteLength;
-      // onProgress(100 * (bytesSent / this.file.size));
+      this.onProgress.dispatch(100 * (bytesSent / this.file.size));
       if (offset < this.file.size) {
         readSlice(offset);
       }
@@ -93,5 +95,6 @@ export class TextSender extends Sender {
 
     this.dataChannel.send(JSON.stringify(header));
     this.dataChannel.send(this.text);
+    this.onProgress.dispatch(100);
   }
 }
