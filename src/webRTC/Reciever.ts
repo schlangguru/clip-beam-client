@@ -1,9 +1,10 @@
-import { MessageHeader } from "./Message";
+import { MessageHeader, Message } from "./Message";
 import { EventDispatcher } from "./EventDispatcher";
 
-abstract class Reciever {
+export abstract class Reciever {
   protected readonly dataChannel: RTCDataChannel;
   private _header?: MessageHeader;
+  public readonly onRecieveMessage = new EventDispatcher<Message>();
 
   constructor(dataChannel: RTCDataChannel) {
     this.dataChannel = dataChannel;
@@ -33,6 +34,11 @@ abstract class Reciever {
     if (!this._header) {
       const header = JSON.parse(event.data as string) as MessageHeader;
       this._header = header;
+      this.onRecieveMessage.dispatch({
+        header: header,
+        transferCompleted: false,
+        transferProgress: 0
+      });
     } else {
       this.onData(event);
     }
@@ -40,26 +46,43 @@ abstract class Reciever {
 }
 
 export class TextReciever extends Reciever {
-  public readonly onText = new EventDispatcher<string>();
-
   protected onData(event: MessageEvent) {
     const text = event.data as string;
     this.closeChannel();
-    this.onText.dispatch(text);
+    this.onRecieveMessage.dispatch({
+      header: this.header(),
+      timestamp: new Date(),
+      transferCompleted: true,
+      transferProgress: 100,
+      payload: text
+    });
   }
 }
 
 export class FileReciever extends Reciever {
-  public readonly onFile = new EventDispatcher<File>();
   private receivedChunks: ArrayBuffer[] = [];
+  private bytesRecieved = 0;
 
   protected onData(event: MessageEvent) {
-    this.receivedChunks.push(event.data as ArrayBuffer);
+    const buffer = event.data as ArrayBuffer;
+    this.receivedChunks.push(buffer);
+    this.bytesRecieved += buffer.byteLength;
+    this.onRecieveMessage.dispatch({
+      header: this.header(),
+      transferCompleted: false,
+      transferProgress: 100 * (this.bytesRecieved / this.header().size)
+    });
     if (this.header().size === this.recievedByteLength()) {
       const fileName = this.header().name || "Unknown File";
       const file = new File(this.receivedChunks, fileName);
       this.closeChannel();
-      this.onFile.dispatch(file);
+      this.onRecieveMessage.dispatch({
+        header: this.header(),
+        timestamp: new Date(),
+        transferCompleted: true,
+        transferProgress: 100,
+        payload: file
+      });
     }
   }
 

@@ -1,14 +1,18 @@
+import { v4 as uuidv4 } from "uuid";
 import { EventDispatcher } from "./EventDispatcher";
 import { MessageType, Message } from "./Message";
 import { TextSender, FileSender } from "./Sender";
-import { TextReciever, FileReciever } from "./Reciever";
+import { Reciever, TextReciever, FileReciever } from "./Reciever";
 
 type ProgressCallback = (progress: number) => void;
 export class PeerConnection {
   private readonly rtcConnection: RTCPeerConnection;
   private readonly heartBeatChannel: RTCDataChannel;
 
-  public readonly onMessage = new EventDispatcher<Message>();
+  public readonly onRecievingMessage = new EventDispatcher<{
+    id: string;
+    msg: Message;
+  }>();
   public readonly onClose = new EventDispatcher<void>();
 
   constructor(
@@ -45,28 +49,19 @@ export class PeerConnection {
   private onDataChannel(event: RTCDataChannelEvent) {
     const dataChannel = event.channel || event.target;
     const label = dataChannel.label;
+    let reciever: Reciever;
     if (label.startsWith(MessageType.FILE)) {
-      const reciever = new FileReciever(dataChannel);
-      reciever.onFile.addListener(file => {
-        this.onMessage.dispatch({
-          type: MessageType.FILE,
-          timestamp: new Date(),
-          payload: file
-        });
-      });
-      reciever.recieve();
+      reciever = new FileReciever(dataChannel);
     } else if (label.startsWith(MessageType.TEXT)) {
-      const reciever = new TextReciever(dataChannel);
-      reciever.onText.addListener(text => {
-        this.onMessage.dispatch({
-          type: MessageType.TEXT,
-          timestamp: new Date(),
-          payload: text
-        });
-      });
-      reciever.recieve();
+      reciever = new TextReciever(dataChannel);
     } else {
       throw `Unknown channel type ${label}`;
     }
+
+    const id = uuidv4();
+    reciever.onRecieveMessage.addListener(msg => {
+      this.onRecievingMessage.dispatch({ id, msg });
+    });
+    reciever.recieve();
   }
 }

@@ -73,11 +73,12 @@
         <div class="data-channel">
           <div class="messages-wrapper">
             <div class="messages">
-              <Card v-for="msg in messages" v-bind:key="msg" class="message">
-                <template #content>
-                  <a :href="fileUrl(msg)" :download="msg.name">Download</a>
-                </template>
-              </Card>
+              <MessageCard
+                v-for="(msg, id) in messages"
+                v-bind:key="id"
+                class="message"
+                :msg="msg"
+              ></MessageCard>
             </div>
           </div>
 
@@ -123,12 +124,12 @@
 import { defineComponent } from "vue";
 
 // Compoenents
-import Card from "primevue/card";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
+import MessageCard from "./components/MessageCard.vue";
 import QrCode from "./components/QrCode.vue";
 import QrScanner from "./components/QrScanner.vue";
 
@@ -136,6 +137,7 @@ import QrScanner from "./components/QrScanner.vue";
 import { v4 as uuidv4 } from "uuid";
 import { SignalingClient } from "./webRTC/SignalingClient";
 import { PeerConnection } from "./webRTC/PeerConnection";
+import { MessageType, MessageHeader, Message } from "./webRTC/Message";
 
 const signalingClient = new SignalingClient();
 let connection: PeerConnection;
@@ -143,12 +145,12 @@ let connection: PeerConnection;
 export default defineComponent({
   name: "App",
   components: {
-    Card,
     Button,
     Dialog,
     InputText,
     TabView,
     TabPanel,
+    MessageCard,
     QrCode,
     QrScanner
   },
@@ -159,7 +161,7 @@ export default defineComponent({
       connectionEstablished: false,
 
       currentMessage: "",
-      messages: [] as (string | File)[],
+      messages: {} as { id: string; msg: Message },
 
       showErrorDialog: false,
       errorMessage: ""
@@ -170,10 +172,17 @@ export default defineComponent({
     signalingClient.onConnectionEstablished.addListener(con => {
       connection = con;
       this.connectionEstablished = true;
+
       connection.onClose.addListener(() => {
         this.errorMessage = "The connection was closed";
         this.showErrorDialog = true;
         this.connectionEstablished = false;
+      });
+
+      connection.onRecievingMessage.addListener(event => {
+        const id = event.id;
+        const msg = event.msg;
+        this.messages[id] = msg;
       });
     });
   },
@@ -212,8 +221,28 @@ export default defineComponent({
       }
     },
 
-    addMessage(msg: string | File) {
-      this.messages.push(msg);
+    addMessage(payload: string | File) {
+      let header: MessageHeader;
+      if (typeof payload === "string") {
+        header = {
+          type: MessageType.TEXT,
+          size: payload.length
+        };
+      } else {
+        header = {
+          type: MessageType.FILE,
+          name: payload.name,
+          size: payload.size
+        };
+      }
+      const msg = {
+        header: header,
+        timestamp: new Date(),
+        transferCompleted: true,
+        transferProgress: 100,
+        payload: payload
+      };
+      this.messages[uuidv4()] = msg;
       this.$nextTick(() => {
         const bottomMsg = this.$el.querySelector(".message:last-child");
         bottomMsg.scrollIntoView();

@@ -10,7 +10,9 @@ export interface MessageHeader {
 }
 
 export interface Message {
-  type: MessageType;
-  timestamp: Date;
-  payload: string | File;
+  header: MessageHeader;
+  timestamp?: Date;
+  transferCompleted: boolean;
+  transferProgress: number;
+  payload?: string | File;
 }

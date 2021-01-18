@@ -42,10 +42,8 @@ export class FileSender extends Sender {
     const payload = await this.file.arrayBuffer();
     const header = {
       type: MessageType.FILE,
-      size: payload.byteLength,
-      timeSent: new Date(),
-      fileName: this.file.name,
-      mimeType: this.file.type
+      name: this.file.name,
+      size: payload.byteLength
     } as MessageHeader;
 
     this.dataChannel.send(JSON.stringify(header));
@@ -83,14 +81,13 @@ export class TextSender extends Sender {
   }
 
   public type() {
-    return MessageType.FILE;
+    return MessageType.TEXT;
   }
 
   protected async sendData() {
     const header = {
       type: MessageType.TEXT,
-      size: this.text.length,
-      timeSent: new Date()
+      size: this.text.length
     } as MessageHeader;
 
     this.dataChannel.send(JSON.stringify(header));
