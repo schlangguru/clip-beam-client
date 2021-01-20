@@ -185,6 +185,13 @@ export default defineComponent({
       this.connecting = true;
     });
 
+    signalingClient.onConnectionFailed.addListener(() => {
+      this.connecting = false;
+      this.errorMessage = `Could not establish a connection.
+        Ensure that both devices are in the same network and reachable.`;
+      this.showErrorDialog = true;
+    });
+
     signalingClient.onConnectionEstablished.addListener(con => {
       connection = con;
       this.connecting = false;

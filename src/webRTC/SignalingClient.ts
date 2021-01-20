@@ -24,6 +24,7 @@ export class SignalingClient {
   private readonly rtcPeerConnection: RTCPeerConnection;
 
   public readonly onInitConnection = new EventDispatcher<void>();
+  public readonly onConnectionFailed = new EventDispatcher<void>();
   public readonly onConnectionEstablished = new EventDispatcher<
     PeerConnection
   >();
@@ -35,6 +36,11 @@ export class SignalingClient {
     );
 
     this.rtcPeerConnection = new RTCPeerConnection(RTC_CONNECTION_CONFIG);
+    this.rtcPeerConnection.oniceconnectionstatechange = () => {
+      if (this.rtcPeerConnection.iceConnectionState === "failed") {
+        this.onConnectionFailed.dispatch();
+      }
+    };
   }
 
   public registerClient(uuid: string) {
