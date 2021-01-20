@@ -23,6 +23,7 @@ export class SignalingClient {
   private readonly signalingSocket: WebSocket;
   private readonly rtcPeerConnection: RTCPeerConnection;
 
+  public readonly onInitConnection = new EventDispatcher<void>();
   public readonly onConnectionEstablished = new EventDispatcher<
     PeerConnection
   >();
@@ -87,6 +88,7 @@ export class SignalingClient {
   }
 
   private async onOffer(peerUuid: string, offer: RTCSessionDescriptionInit) {
+    this.onInitConnection.dispatch();
     this.rtcPeerConnection.setRemoteDescription(
       new RTCSessionDescription(offer)
     );

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <div class="panel">
+    <div v-if="!connecting" class="panel">
       <div class="panel-header">
         <img src="/img/logo-inversed.svg" />
       </div>
@@ -117,6 +117,9 @@
         <Button label="Close" @click="showErrorDialog = false" />
       </template>
     </Dialog>
+
+    <!-- Loader -->
+    <loader label="Loading..." :show="connecting"></loader>
   </div>
 </template>
 
@@ -129,6 +132,8 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
+
+import Loader from "./components/Loader.vue";
 import MessageCard from "./components/MessageCard.vue";
 import QrCode from "./components/QrCode.vue";
 import QrScanner from "./components/QrScanner.vue";
@@ -150,6 +155,7 @@ export default defineComponent({
     InputText,
     TabView,
     TabPanel,
+    Loader,
     MessageCard,
     QrCode,
     QrScanner
@@ -159,6 +165,7 @@ export default defineComponent({
       myUuid: uuidv4(),
       peerUuid: null as string | null,
       connectionEstablished: false,
+      connecting: false,
 
       currentMessage: "",
       messages: {} as { id: string; msg: Message },
@@ -169,8 +176,13 @@ export default defineComponent({
   },
   mounted() {
     signalingClient.registerClient(this.myUuid);
+    signalingClient.onInitConnection.addListener(() => {
+      this.connecting = true;
+    });
+
     signalingClient.onConnectionEstablished.addListener(con => {
       connection = con;
+      this.connecting = false;
       this.connectionEstablished = true;
 
       connection.onClose.addListener(() => {
@@ -211,6 +223,7 @@ export default defineComponent({
 
     connectToDevice() {
       if (this.peerUuid) {
+        this.connecting = true;
         signalingClient.connectToDevice(this.peerUuid);
       }
     },
