@@ -4,7 +4,7 @@
 
 ![GitHub](https://img.shields.io/github/license/schlangguru/clip-beam-client)
 
-Clip Beam lets you transfer your data easily between two devices. Just connect the devices by scanning a QR code and start sharing.
+Clip Beam lets you transfer your data easily between two devices on the same network. Just connect the devices by scanning a QR code and start sharing.
 
 Clip Beam uses [WebRTC](https://webrtc.org/) to transfer your data, meaning all messages are transfered directly between devices without sending them to any server.
 
