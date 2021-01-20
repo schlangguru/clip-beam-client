@@ -24,7 +24,7 @@
 
       <!-- TEXT -->
       <div v-else class="content-text">
-        <span>{{ msg.payload }}</span>
+        <span class="text">{{ msg.payload }}</span>
         <Button
           @click="copyToClipboard"
           icon="pi pi-copy"
@@ -137,6 +137,10 @@ a:active {
   flex-wrap: nowrap;
   justify-content: space-between;
   padding: 15px;
+}
+
+.card .content-text .text {
+  white-space: pre-wrap;
 }
 
 .card .content-file {

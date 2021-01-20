@@ -82,11 +82,14 @@
             </div>
           </div>
 
-          <div class="p-inputgroup text-input">
-            <InputText
-              @keyup.enter="sendText"
-              placeholder="send text"
+          <div class="text-input">
+            <Textarea
+              class="text-area"
+              placeholder="ctrl+enter to send"
+              @keyup.enter="onTextEnter"
               v-model="currentMessage"
+              :autoResize="true"
+              rows="1"
             />
             <Button
               @click="selectFile"
@@ -132,6 +135,7 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
+import Textarea from "primevue/textarea";
 
 import Loader from "./components/Loader.vue";
 import MessageCard from "./components/MessageCard.vue";
@@ -155,6 +159,7 @@ export default defineComponent({
     InputText,
     TabView,
     TabPanel,
+    Textarea,
     Loader,
     MessageCard,
     QrCode,
@@ -276,6 +281,12 @@ export default defineComponent({
       if (files && files.length >= 1) {
         const file = files[0];
         this.sendFile(file);
+      }
+    },
+
+    onTextEnter(event: KeyboardEvent) {
+      if (event.ctrlKey) {
+        this.sendText();
       }
     },
 
@@ -419,5 +430,13 @@ body {
 
 .panel-content .data-channel .text-input {
   flex-grow: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+.panel-content .data-channel .text-input .text-area {
+  flex-grow: 1;
 }
 </style>
