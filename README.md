@@ -12,13 +12,13 @@ Clip Beam uses [WebRTC](https://webrtc.org/) to transfer your data, meaning all 
 
 ## Table of content
 
-- [Quick Setup](#quick-setup)
-- [Advanced Setup](#advanced-setup)
+- [Quick Start](#quick-setup)
+- [Setup](#setup)
   - [Client](#setup-the-client)
   - [Signaling Server](#setup-the-signaling-server)
 - [Inspiration and Alternatives](#inspiration-and-alternatives)
 
-## Quick Setup
+## Quick Start
 
 1. Clone the [signaling server](https://github.com/schlangguru/clip-beam-server)
 
@@ -33,7 +33,7 @@ Clip Beam uses [WebRTC](https://webrtc.org/) to transfer your data, meaning all 
 - `npm run serve`
 - Go to [localhost:8080](localhost:8080)
 
-## Advanced Setup
+## Setup
 
 To setup your own instance of Clip Beam you need to setup the [signaling server](https://github.com/schlangguru/clip-beam-server) and host the frontend as simple HTML website.
 
