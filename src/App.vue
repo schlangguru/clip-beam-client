@@ -122,7 +122,7 @@
     </Dialog>
 
     <!-- Loader -->
-    <loader label="Loading..." :show="connecting"></loader>
+    <loader label="Connecting..." :show="connecting"></loader>
   </div>
 </template>
 
