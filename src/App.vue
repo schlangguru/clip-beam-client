@@ -9,11 +9,11 @@
         <div class="description">
           <h1>How to use Clip Beam:</h1>
           <ol>
-            <li>Open the web app on 2 devices</li>
+            <li>Open the web app on two devices</li>
             <li>
               On the first device show the
               <i class="pi pi-th-large"></i>
-              QR coden
+              QR code
             </li>
             <li>
               On the second device open the
