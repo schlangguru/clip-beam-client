@@ -70,7 +70,7 @@ I used to use [Threema Web](https://github.com/threema-ch/threema-web) and its e
 
 Alternatives i've found are
 
-- [Sharedrop](https://github.com/RobinLinus/snapdrop)
+- [Sharedrop](https://github.com/cowbell/sharedrop)
 - [Snapdrop](https://github.com/RobinLinus/snapdrop)
 
 but unlike these apps, Clip Beam does not allow connections between any devices on the same network. It rather connects two devices directly by scanning its QR code, so no one can send you unwanted data.
