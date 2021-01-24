@@ -3,7 +3,7 @@
     <!-- Message Content -->
     <div v-if="msg.transferCompleted">
       <!-- FILE -->
-      <div v-if="isFile" class="content-file">
+      <div v-if="isFile" class="content content-file">
         <div class="content-left">
           <a :href="fileUrl" :download="msg.header.name">
             <i class="pi pi-file" style="fontSize: 2rem"></i>
@@ -17,18 +17,18 @@
         <Button
           @click="downloadFile"
           icon="pi pi-download"
-          class="p-button-primary"
+          class="p-button-primary message-button"
           v-tooltip.bottom="'Download'"
         />
       </div>
 
       <!-- TEXT -->
-      <div v-else class="content-text">
+      <div v-else class="content content-text">
         <span class="text">{{ msg.payload }}</span>
         <Button
           @click="copyToClipboard"
           icon="pi pi-copy"
-          class="p-button-primary"
+          class="p-button-primary message-button"
           v-tooltip.bottom="'Copy into clipboard'"
         />
       </div>
@@ -131,10 +131,17 @@ a:active {
     0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 
-.card .content-text {
+.card .content .message-button {
+  min-width: 2rem;
+}
+
+.card .content {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+}
+
+.card .content-text {
   justify-content: space-between;
   padding: 15px;
 }
@@ -144,9 +151,6 @@ a:active {
 }
 
 .card .content-file {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
   gap: 10px;
   padding: 15px;
 }
