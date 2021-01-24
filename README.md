@@ -8,7 +8,7 @@ Clip Beam lets you transfer your data easily between two devices on the same net
 
 Clip Beam uses [WebRTC](https://webrtc.org/) to transfer your data, meaning all messages are transfered directly between devices without sending them to any server.
 
-![Clip Beam](https://raw.githubusercontent.com/schlangguru/clip-beam-client/master/assets/demo.png)
+![Clip Beam](./assets/demo.png)
 
 ## Table of content
 
